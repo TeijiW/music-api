@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using musics_api.DTOs;
 using musics_api.Repository;
 using webapi.Models;
 
@@ -11,56 +13,66 @@ namespace webapi.Controllers
     public class MusicsController : ControllerBase
     {
         private readonly IUnitOfWork _uof;
-        public MusicsController(IUnitOfWork uof)
+        private readonly IMapper _mapper;
+        public MusicsController(IUnitOfWork uof, IMapper mapper)
         {
             _uof = uof;
+            _mapper = mapper;
         }
 
         [HttpGet("author")]
-        public ActionResult<IEnumerable<Music>> GetByAuthor()
+        public ActionResult<IEnumerable<MusicDTO>> GetByAuthor()
         {
-            return _uof.MusicRepository.GetMusicByAuthor().ToList();
+            var musicsByAuthor = _uof.MusicRepository.GetMusicByAuthor().ToList();
+            var musicsByAuthorDTO = _mapper.Map<List<MusicDTO>>(musicsByAuthor);
+            return musicsByAuthorDTO;
         }
         [HttpGet]
-        public ActionResult<IEnumerable<Music>> Get()
+        public ActionResult<IEnumerable<MusicDTO>> Get()
         {
-            return _uof.MusicRepository.Get().ToList();
+            var musics = _uof.MusicRepository.Get().ToList();
+            var musicsDTO = _mapper.Map<List<MusicDTO>>(musics);
+            return musicsDTO;
         }
 
         [HttpGet("{Id:int:min(1)}", Name = "GetMusic")]
-        public ActionResult<Music> GetById(int Id)
+        public ActionResult<MusicDTO> GetById(int Id)
         {
             var music = _uof.MusicRepository.GetById(music => music.Id == Id);
-
             if (music == null) { return NotFound(); }
-            return music;
+            var musicDTO = _mapper.Map<MusicDTO>(music);
+            return musicDTO;
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] Music music)
+        public ActionResult Post([FromBody] MusicDTO musicDTO)
         {
+            var music = _mapper.Map<Music>(musicDTO);
             _uof.MusicRepository.Add(music);
             _uof.Commit();
-            return new CreatedAtRouteResult("GetMusic", new { id = music.Id }, music);
+            var musicDTOReturn = _mapper.Map<MusicDTO>(music);
+            return new CreatedAtRouteResult("GetMusic", new { id = music.Id }, musicDTOReturn);
         }
 
         [HttpPut("{Id:int:min(1)}")]
-        public ActionResult Put(int Id, [FromBody] Music music)
+        public ActionResult Put(int Id, [FromBody] MusicDTO musicDTO)
         {
-            if (Id != music.Id) { return BadRequest(); }
+            if (Id != musicDTO.Id) { return BadRequest(); }
+            var music = _mapper.Map<Music>(musicDTO);
             _uof.MusicRepository.Update(music);
             _uof.Commit();
             return Ok();
         }
 
         [HttpDelete("{Id:int:min(1)}")]
-        public ActionResult<Music> Delete(int Id)
+        public ActionResult<MusicDTO> Delete(int Id)
         {
             var music = _uof.MusicRepository.GetById(music => music.Id == Id);
             if (music == null) { return NotFound(); }
             _uof.MusicRepository.Delete(music);
             _uof.Commit();
-            return music;
+            var musicDTO = _mapper.Map<MusicDTO>(music);
+            return musicDTO;
         }
     }
 }
