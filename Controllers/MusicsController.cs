@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using musics_api.DTOs;
 using musics_api.Repository;
@@ -8,6 +9,7 @@ using webapi.Models;
 
 namespace webapi.Controllers
 {
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[Controller]")]
     [ApiController]
     public class MusicsController : ControllerBase

@@ -1,16 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using musics_api.DTOs;
 using musics_api.Repository;
-using webapi.Context;
 using webapi.Models;
 
 namespace webapi.Controllers
 {
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[Controller]")]
     [ApiController]
     public class AuthorsController : ControllerBase
